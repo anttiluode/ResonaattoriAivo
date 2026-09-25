@@ -65,7 +65,7 @@ python posthoc.py          # GRU-128 at one tempo + junction length sweep
 python posthoc_noise.py    # state-noise test
 python make_figure.py
 ```
-Open `demo/index.html` in a browser for the instrument. Teach it Ukko Nooa, change the tempo, then press Cue & continue.
+Open `[demo/index.html](https://anttiluode.github.io/ResonaattoriAivo/demo/index.html)` in a browser for the instrument. Teach it Ukko Nooa, change the tempo, then press Cue & continue.
 
 After the sd-floor option was added, RA reproduces the receipt within 0.6 points. The receipt itself comes from the commit that precedes the post-hoc work.
 
