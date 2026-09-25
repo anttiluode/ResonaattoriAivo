@@ -47,6 +47,38 @@ Accuracy by tempo (next-beat token, ceiling 96.4 %):
 
 **What this shows.** A capable GRU trained at one tempo knows that tempo only. Moving 10 % off drops it to 38–50 %. To reach RA's flat curve, it needs 12× the parameters **and** training at every tempo, and it still slips outside the range it was trained on (85.9 % at 0.6×). RA learns at one tempo and is flat from 0.6× to 1.6×. The frozen-clock ablation shows this comes from the clock. The resonators alone do not provide it.
 
+## Stage 2: the residue reshapes the geometry
+
+Stage 1 is "the brain starts with geometry": fixed resonators, a fixed random pyramid layer, and only the readout learns. Stage 2 lets the prediction error reshape what the system is susceptible to. Two things can change: each resonator's decay τ and frequency ν (**16 numbers**), and the coupling that mixes modes into the pyramids (**74k numbers**). The gates are in [`GATES_STAGE2.md`](GATES_STAGE2.md) and were committed before the runs. Receipts: [`results/receipt_stage2.json`](results/receipt_stage2.json), [`results/receipt_stage2_s5.json`](results/receipt_stage2_s5.json).
+
+"The residue reshapes it" means backprop of the prediction error into τ, ν and the coupling. At the output, that gradient is exactly the residue onehot − p. It is not a local, brain-like plasticity rule.
+
+![noise sweep](results/noise_sweep.png)
+
+| gate | what | result |
+|---|---|---|
+| S1 | at noise 0.003, plastic τ/ν ≥ fixed + 10 pts | **FAIL** 95.9 vs 94.8 %. The fixed arm was already fine at this noise; the pilot had shown this before the run (see ledger). |
+| S2 | tempo transfer survives plastic geometry | **PASS** worst tempo −0.7 pts |
+| S3 | 18-beat junction, plastic ≥ fixed + 15 pts | **FAIL** 100 vs 93.5 %. Better on every seed, but short of +15. |
+| S5a | noise 0.01, fresh seeds: plastic τ/ν ≥ fixed + 15 pts, every seed | **PASS** 88.3 vs 58.7 % (seeds 82 / 92 / 90 vs 61 / 58 / 57) |
+| S5b | geometry adds on top of trainable coupling (+5 pts) | **FAIL** 96.1 vs 96.1 % |
+
+Noise 0.01, three fresh seeds, tempos 0.6 / 1.0 / 1.6:
+
+| arm | trainable beyond readout | whole song | after the 18-beat junction |
+|---|---|---|---|
+| fixed | nothing | 58.7 % | 59.4 % |
+| plastic τ, ν | 16 numbers | 88.3 % | 97.2 % |
+| coupling only | 74k numbers | 96.1 % | 100 % |
+| plastic τ, ν + coupling | 74k + 16 | 96.1 % | 99.8 % |
+
+**What this shows.**
+- A fixed random response geometry collapses under state noise. Letting the residue retune it rescues the memory. The rescue is large (+30 points) and holds on every seed.
+- The *which part* result is the honest limit. Retuning 16 resonator numbers recovers about 80 % of the gap. Retuning the mode-to-pyramid coupling recovers all of it, and once the coupling is plastic, the resonator geometry adds nothing measurable. "Plasticity of the response geometry" is supported. "It has to be the resonance frequencies" is not: in this model the susceptibility can live in the resonators or in how they are combined.
+- Per number, the resonator geometry is by far the most efficient: 16 numbers for +30 points.
+- **What the geometry learned** (noise 0.003, all 3 seeds agree): the fastest mode slows down (τ 0.7 → 1.0–1.6 beats), and both oscillating modes lengthen their decay (3 → 4.4–4.8 and 8 → 10–12 beats). The oscillating modes keep their frequencies (ν ≈ 0.25 and 0.12 cycles/beat). The pure-decay modes pick up small rotations (|ν| up to 0.1).
+- **Correction to Stage 1.** Stage 1's drop to 73–78 % at noise 0.003 was mostly its training (delta rule, feature scaling), not the fixed geometry. With a better-conditioned readout, fixed geometry holds 94.8 % at that noise. The fragility is real, but it starts at higher noise (0.01).
+
 ## Ledger: what did not work, and what is not new
 
 - **G4 failed.** A 6-beat shared segment is not long enough to need the slow bands. The post-hoc sweep (`posthoc.py`) makes the segment 12 and 18 beats long. Without slow bands the model then drops to 82–84 %, while full RA stays at 100 %. So the slow bands help noise-free.
@@ -64,8 +96,11 @@ python run_gates.py        # ~20 min on 2 CPU cores (GRU training dominates)
 python posthoc.py          # GRU-128 at one tempo + junction length sweep
 python posthoc_noise.py    # state-noise test
 python make_figure.py
+python run_stage2.py       # Stage 2 gates S1-S3 + noise sweep (~40 min)
+python run_stage2_s5.py    # S5 confirmation at noise 0.01 (~20 min)
+python make_figure_stage2.py
 ```
-[Check out the live demo!](https://anttiluode.github.io/ResonaattoriAivo/demo/index.html) in a browser for the instrument. Teach it Ukko Nooa, change the tempo, then press Cue & continue.
+Open `demo/index.html` in a browser for the instrument. Teach it Ukko Nooa, change the tempo, then press Cue & continue.
 
 After the sd-floor option was added, RA reproduces the receipt within 0.6 points. The receipt itself comes from the commit that precedes the post-hoc work.
 
@@ -78,5 +113,8 @@ ra/model.py         Clock, ResonatorBank, ResonaattoriAivo (fit / predict / free
 ra/baselines.py     GRU on frames, beat-grid n-gram
 run_gates.py        G0–G6 → results/receipt.json
 posthoc*.py         follow-ups written after the receipt
+GATES_STAGE2.md     Stage 2 gates (plastic geometry) + ledger
+ra/plastic.py       torch resonators whose tau, nu and coupling the residue can reshape
+run_stage2*.py      Stage 2 runners
 demo/index.html     browser instrument (same model, RLS readout)
 ```

@@ -1,0 +1,35 @@
+[     1s] worlds ready; ceilings 0.9635416666666666 0.9609375
+[    20s] fixed 0 mean 0.9469696933572943
+[    39s] fixed 1 mean 0.9455492442304437
+[    57s] fixed 2 mean 0.9515861760486256
+[   124s] plastic-geom 0 mean 0.9595170400359414
+[   196s] plastic-geom 1 mean 0.9605823917822405
+[   261s] plastic-geom 2 mean 0.9571496194059198
+[   331s] plastic-geom+coupling 0 mean 0.9564393975517966
+[   404s] plastic-geom+coupling 1 mean 0.959990528496829
+[   482s] plastic-geom+coupling 2 mean 0.9596354094418612
+[   482s] S1 {'mean_over_tempos': {'fixed': 0.948035037878788, 'plastic-geom': 0.9590830170747006, 'plastic-geom+coupling': 0.9586884451634957}, 'per_seed': {'fixed': [0.9469696933572943, 0.9455492442304437, 0.9515861760486256], 'plastic-geom': [0.9595170400359414, 0.9605823917822405, 0.9571496194059198], 'plastic-geom+coupling': [0.9564393975517966, 0.959990528496829, 0.9596354094418612]}, 'plastic_frac_of_ceiling': 0.9953726447477974, 'PASS': False}
+[   482s] S2 drop 0.006510436534881592
+[   507s] B fixed 0 0.9398148059844971
+[   531s] B fixed 1 0.9305555621782938
+[   552s] B fixed 2 0.935185174147288
+[   625s] B plastic-geom 0 1.0
+[   698s] B plastic-geom 1 1.0
+[   772s] B plastic-geom 2 1.0
+[   852s] B plastic-geom+coupling 0 1.0
+[   932s] B plastic-geom+coupling 1 1.0
+[  1005s] B plastic-geom+coupling 2 1.0
+[  1005s] S3 {'post_junction': {'fixed': 0.9351851807700262, 'plastic-geom': 1.0, 'plastic-geom+coupling': 1.0}, 'per_seed': {'fixed': [0.9398148059844971, 0.9305555621782938, 0.935185174147288], 'plastic-geom': [1.0, 1.0, 1.0], 'plastic-geom+coupling': [1.0, 1.0, 1.0]}, 'PASS': False}
+[  1024s] sweep fixed 0.0 {'whole_song_A': 0.953124980131785, 'post_junction_B': 0.9907407363255819}
+[  1141s] sweep plastic-geom 0.0 {'whole_song_A': 0.957031269868215, 'post_junction_B': 1.0}
+[  1267s] sweep plastic-geom+coupling 0.0 {'whole_song_A': 0.9565972288449606, 'post_junction_B': 1.0}
+[  1309s] sweep fixed 0.003 {'whole_song_A': 0.9361979166666666, 'post_junction_B': 0.935185174147288}
+[  1454s] sweep plastic-geom 0.003 {'whole_song_A': 0.9557291666666666, 'post_junction_B': 0.9907407363255819}
+[  1607s] sweep plastic-geom+coupling 0.003 {'whole_song_A': 0.956163207689921, 'post_junction_B': 1.0}
+[  1650s] sweep fixed 0.01 {'whole_song_A': 0.5902777711550394, 'post_junction_B': 0.597222218910853}
+[  1795s] sweep plastic-geom 0.01 {'whole_song_A': 0.8815104166666666, 'post_junction_B': 0.9722222288449606}
+[  1957s] sweep plastic-geom+coupling 0.01 {'whole_song_A': 0.95703125, 'post_junction_B': 1.0}
+[  2005s] sweep fixed 0.02 {'whole_song_A': 0.4939236144224803, 'post_junction_B': 0.5277777711550394}
+[  2145s] sweep plastic-geom 0.02 {'whole_song_A': 0.7217881878217062, 'post_junction_B': 0.8425925970077515}
+[  2275s] sweep plastic-geom+coupling 0.02 {'whole_song_A': 0.9557291467984518, 'post_junction_B': 1.0}
+[  2275s] SUMMARY {'S1': False, 'S2': True, 'S3': False}
