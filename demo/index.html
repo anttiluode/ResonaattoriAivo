@@ -1,0 +1,507 @@
+<title>ResonaattoriAivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EDF0F3; --panel:#F8F9FB; --ink:#1B2A41; --muted:#5B6B80; --line:#CBD3DD;
+  --brass:#B0612A; --brass-soft:#E9CDB6; --machine:#2B7A74; --machine-soft:#C4E1DD;
+  --hot:#C0392B; --pad:#FFFFFF;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10161D; --panel:#17202A; --ink:#DCE4EC; --muted:#8C9BAD; --line:#2C3947;
+    --brass:#E0894D; --brass-soft:#4A3222; --machine:#5DB8AE; --machine-soft:#1E3C3A;
+    --hot:#EF6B5B; --pad:#1D2733;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10161D; --panel:#17202A; --ink:#DCE4EC; --muted:#8C9BAD; --line:#2C3947;
+  --brass:#E0894D; --brass-soft:#4A3222; --machine:#5DB8AE; --machine-soft:#1E3C3A;
+  --hot:#EF6B5B; --pad:#1D2733;
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.5;
+  padding-inline:16px; padding-block:20px 40px}
+.wrap{max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+header{display:flex; flex-direction:column; gap:6px}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(28px,4.2vw,44px); letter-spacing:-0.01em; margin:0; line-height:1.05}
+h1 span{color:var(--brass)}
+.lede{margin:0; max-width:68ch; color:var(--muted)}
+.grid{display:grid; grid-template-columns: 300px 1fr; gap:18px; align-items:start}
+@media (max-width:860px){ .grid{grid-template-columns:1fr} }
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:14px}
+.label{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+button{font:500 14px var(--body); color:var(--ink); background:var(--pad); border:1px solid var(--line); border-radius:7px; padding:8px 12px; cursor:pointer}
+button:hover{border-color:var(--ink)}
+button:focus-visible, select:focus-visible, input:focus-visible{outline:2px solid var(--brass); outline-offset:2px}
+button.primary{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+button.machine{background:var(--machine); color:var(--bg); border-color:var(--machine)}
+button:disabled{opacity:.45; cursor:default}
+select{font:14px var(--body); color:var(--ink); background:var(--pad); border:1px solid var(--line); border-radius:7px; padding:7px 8px; width:100%}
+.tempo{display:flex; flex-direction:column; gap:4px}
+.tempo output{font-family:var(--mono); font-size:22px; font-variant-numeric:tabular-nums}
+input[type=range]{width:100%; accent-color:var(--brass)}
+.steps{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:14px}
+.steps b{color:var(--ink); font-weight:600}
+.status{font-family:var(--mono); font-size:13px; padding:8px 10px; border-radius:7px; background:var(--bg); border:1px solid var(--line); min-height:2.4em; font-variant-numeric:tabular-nums}
+.check{display:flex; gap:8px; align-items:center; font-size:14px}
+.main{display:flex; flex-direction:column; gap:18px; min-width:0}
+.two{display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+@media (max-width:640px){ .two{grid-template-columns:1fr} }
+canvas{width:100%; display:block}
+.cap{font-size:13px; color:var(--muted); margin:0; max-width:70ch}
+.pads{display:grid; grid-template-columns:repeat(8,1fr); gap:6px}
+.pad{display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 0 10px; border-radius:8px; background:var(--pad); border:1px solid var(--line); user-select:none; touch-action:manipulation}
+.pad .n{font-family:var(--display); font-weight:700; font-size:18px}
+.pad .k{font-family:var(--mono); font-size:11px; color:var(--muted)}
+.pad.hit{background:var(--brass-soft); border-color:var(--brass)}
+.pad.mhit{background:var(--machine-soft); border-color:var(--machine)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--muted)}
+.sw{display:inline-block; width:11px; height:11px; border-radius:2px; vertical-align:-1px; margin-right:5px}
+footer{font-size:13px; color:var(--muted); max-width:80ch}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="label">PerceptionLab · anttiluode/ResonaattoriAivo</div>
+    <h1>Resonaattori<span>Aivo</span></h1>
+    <p class="lede">A memory made of resonators that keep time in beats, not seconds. Teach it a melody at one tempo. Then play the opening at a different tempo, and it continues the melody at that tempo.</p>
+  </header>
+
+  <div class="grid">
+    <aside class="panel" aria-label="Controls">
+      <div class="label">Try this</div>
+      <ol class="steps">
+        <li><b>Teach</b> Ukko Nooa at 100 bpm. It listens three times and the residue noise dies away.</li>
+        <li>Move tempo to <b>150</b> (or 70) and press <b>Cue &amp; continue</b>. You get 12 beats of cue, then it plays the rest alone.</li>
+      </ol>
+
+      <div class="tempo">
+        <label class="label" for="tempo">Tempo</label>
+        <output id="tempoOut">100 bpm</output>
+        <input type="range" id="tempo" min="50" max="200" step="5" value="100">
+      </div>
+
+      <div>
+        <label class="label" for="song">Melody</label>
+        <select id="song">
+          <option value="ukko">Ukko Nooa (simplified, 32 beats)</option>
+          <option value="randA">Random melody A (32 beats)</option>
+          <option value="randB">Random melody B (32 beats)</option>
+          <option value="own">Your own: play it on the pads (16 beats)</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <button id="teach" class="primary">Teach ×3</button>
+        <button id="cue" class="machine">Cue &amp; continue</button>
+        <button id="stop">Stop</button>
+      </div>
+      <div class="row">
+        <button id="forget">Forget everything</button>
+      </div>
+      <label class="check"><input type="checkbox" id="residueSnd" checked> Play the residue as noise</label>
+      <div class="status" id="status" role="status">Press Teach to start. Sound starts on your first click.</div>
+    </aside>
+
+    <section class="main">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div class="label">This run · beat by beat</div>
+          <div class="legend">
+            <span><i class="sw" style="background:var(--ink)"></i>heard</span>
+            <span><i class="sw" style="background:var(--machine)"></i>machine played</span>
+            <span><i class="sw" style="border:2px solid var(--machine)"></i>machine expected</span>
+            <span><i class="sw" style="background:var(--brass)"></i>residue (surprise)</span>
+          </div>
+        </div>
+        <canvas id="roll" height="230" aria-label="Timeline of heard notes, machine predictions and surprise"></canvas>
+      </div>
+
+      <div class="two">
+        <div class="panel">
+          <div class="label">Resonance windows</div>
+          <canvas id="bank" height="300" aria-label="Resonator phases per channel and mode"></canvas>
+          <p class="cap">Rows are input channels, columns are resonators with decay τ in beats. Each hand is one complex state. Its angle and length store when that note last sounded. The resonators advance with the clock's phase, so the pattern for "two beats ago" is the same at any tempo.</p>
+        </div>
+        <div class="panel">
+          <div class="label">Clock and next beat</div>
+          <canvas id="clock" height="300" aria-label="Clock phase and prediction for the next beat"></canvas>
+          <p class="cap">The clock is a phase-locked loop seeded by the four-click count-in and corrected by every onset. The bars are the expected next beat. The outlined bar is what the chandelier releases in free-run: one winner per beat slot.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div class="label">Pads · keys A S D F G H J K</div>
+        </div>
+        <div class="pads" id="pads"></div>
+      </div>
+
+      <div class="panel">
+        <div class="label">Residue per run · it goes quiet as it learns</div>
+        <canvas id="hist" height="120" aria-label="Mean surprise per run"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <footer>Readout learning here is recursive least squares on the residue (actual minus expected), so a single listen is enough. The repo's pre-registered gates use the plain delta rule and compare against GRU baselines. Same resonators, same clock.</footer>
+</div>
+
+<script>
+(() => {
+// ------------------------------------------------------------------ constants
+const FS = 100, P = 8, HOLD = 8, NTOK = 9, NCH = 9, COUNT_IN = 4;
+const MODES = [[0.7,0],[1.5,0],[3,0],[6,0],[12,0],[24,0],[3,0.25],[8,0.125]];
+const K = MODES.length, D = NCH*K*2, N = 256;
+const NOTE_NAMES = ["C","D","E","F","G","A","B","C'"];
+const KEYS = ["a","s","d","f","g","h","j","k"];
+const FREQ = [261.63,293.66,329.63,349.23,392.0,440.0,493.88,523.25];
+const H_ = HOLD;
+const SONGS = {
+  ukko: [0,0,0,2, 1,1,1,3, 2,2,1,1, 0,H_,H_,H_, 2,2,2,2, 4,3,1,1, 3,3,3,3, 5,4,2,H_],
+};
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function randomSong(seed, beats){
+  const r = mulberry(seed), out=[]; let last=-1;
+  while(out.length<beats){
+    let p; do{p=Math.floor(r()*P)}while(p===last); last=p;
+    out.push(p);
+    if(r()<0.3 && out.length<beats) out.push(HOLD);
+  }
+  return out;
+}
+SONGS.randA = randomSong(11, 32);
+SONGS.randB = randomSong(29, 32);
+
+// ------------------------------------------------------------------ model
+const rnd = mulberry(1234);
+function gauss(){let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const Win = new Float64Array(N*D), bin = new Float64Array(N);
+for(let i=0;i<N*D;i++) Win[i] = gauss()*1.5/Math.sqrt(D);
+for(let i=0;i<N;i++) bin[i] = gauss()*0.5;
+const scale = new Float64Array(D);
+for(let c=0;c<NCH;c++) for(let k=0;k<K;k++){const s=2/Math.sqrt(MODES[k][0]); scale[c*K+k]=s; scale[NCH*K+c*K+k]=s;}
+const M = N+1;
+let W, Pm;
+function forget(){
+  W = new Float64Array(NTOK*M);
+  Pm = new Float64Array(M*M); for(let i=0;i<M;i++) Pm[i*M+i]=1;
+}
+forget();
+
+class Clock{
+  constructor(){this.phi=null; this.f=1/60; this.clicks=[];}
+  step(t, onsetAny, click){
+    if(this.phi===null){ if(click){this.phi=0; this.clicks.push(t);} return 0; }
+    const d=this.f; this.phi+=d;
+    if(click && this.clicks.length===1){ this.clicks.push(t); this.f=1/(t-this.clicks[0]); this.phi=1; return d; }
+    if(onsetAny){ const e=this.phi-Math.round(this.phi); this.phi-=0.6*e; this.f*=(1-0.15*e); }
+    return d;
+  }
+}
+class Bank{
+  constructor(){ this.re=new Float64Array(NCH*K); this.im=new Float64Array(NCH*K); }
+  step(dphi, x){
+    for(let k=0;k<K;k++){
+      const [tau,nu]=MODES[k], a=Math.exp(-dphi/tau), th=2*Math.PI*nu*dphi, cr=a*Math.cos(th), ci=a*Math.sin(th);
+      for(let c=0;c<NCH;c++){
+        const i=c*K+k, r=this.re[i], m=this.im[i];
+        this.re[i]=r*cr-m*ci+x[c]; this.im[i]=r*ci+m*cr;
+      }
+    }
+  }
+  pyramids(){
+    const u=new Float64Array(D);
+    for(let i=0;i<NCH*K;i++){u[i]=this.re[i]*scale[i]; u[NCH*K+i]=this.im[i]*scale[NCH*K+i];}
+    const h=new Float64Array(M);
+    for(let n=0;n<N;n++){ let s=bin[n]; const o=n*D; for(let d=0;d<D;d++) s+=Win[o+d]*u[d]; h[n]=Math.tanh(s); }
+    h[N]=1; return h;
+  }
+}
+function readout(h){
+  const o=new Float64Array(NTOK);
+  for(let j=0;j<NTOK;j++){let s=0; const off=j*M; for(let i=0;i<M;i++) s+=W[off+i]*h[i]; o[j]=s;}
+  let mx=-1e9; for(const v of o) mx=Math.max(mx,v);
+  const p=new Float64Array(NTOK); let z=0;
+  for(let j=0;j<NTOK;j++){p[j]=Math.exp(6*(o[j]-mx)); z+=p[j];}
+  for(let j=0;j<NTOK;j++) p[j]/=z;
+  return {o,p};
+}
+function learn(h, o, target){               // RLS on the residue r = onehot - o
+  const Ph=new Float64Array(M);
+  for(let i=0;i<M;i++){let s=0; const off=i*M; for(let j=0;j<M;j++) s+=Pm[off+j]*h[j]; Ph[i]=s;}
+  let den=1; for(let i=0;i<M;i++) den+=h[i]*Ph[i];
+  for(let j=0;j<NTOK;j++){
+    const r=(j===target?1:0)-o[j], off=j*M;
+    for(let i=0;i<M;i++) W[off+i]+=r*Ph[i]/den;
+  }
+  for(let i=0;i<M;i++){ const ki=Ph[i]/den, off=i*M; for(let j=0;j<M;j++) Pm[off+j]-=ki*Ph[j]; }
+}
+
+// ------------------------------------------------------------------ audio
+let ac=null, noiseBuf=null;
+function audio(){
+  if(!ac){
+    try{ ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ac=null; }
+    if(ac){ noiseBuf=ac.createBuffer(1, ac.sampleRate*0.3, ac.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; }
+  }
+  if(ac && ac.state==="suspended") ac.resume();
+  return ac;
+}
+function tone(freq, type, gain, dur, attack){
+  if(!ac) return; const t=ac.currentTime, o=ac.createOscillator(), g=ac.createGain();
+  o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(gain,t+attack); g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t+dur+0.02);
+}
+const playHeard = p => tone(FREQ[p], "triangle", 0.22, 0.45, 0.005);
+const playMachine = p => { tone(FREQ[p], "sine", 0.22, 0.6, 0.02); tone(FREQ[p]*2, "sine", 0.05, 0.4, 0.02); };
+const playClick = () => tone(1760, "square", 0.05, 0.05, 0.001);
+function playResidue(amount){
+  if(!ac || !document.getElementById("residueSnd").checked || amount<0.05) return;
+  const t=ac.currentTime, s=ac.createBufferSource(), f=ac.createBiquadFilter(), g=ac.createGain();
+  s.buffer=noiseBuf; f.type="bandpass"; f.frequency.value=2400; f.Q.value=0.8;
+  g.gain.setValueAtTime(Math.min(0.35, amount*0.12), t); g.gain.exponentialRampToValueAtTime(0.0005, t+0.18);
+  s.connect(f).connect(g).connect(ac.destination); s.start(t); s.stop(t+0.2);
+}
+
+// ------------------------------------------------------------------ session
+let S = null;                     // current run
+const history = [];               // {mean, acc, kind, bpm}
+const $ = id => document.getElementById(id);
+const tempoEl=$("tempo"), statusEl=$("status");
+function bpm(){ return +tempoEl.value; }
+tempoEl.addEventListener("input", ()=>{ $("tempoOut").textContent = bpm()+" bpm"; });
+
+function newRun(kind, loopsLeft){
+  const songKey=$("song").value, own=songKey==="own";
+  const L = own ? 16 : 32;
+  const period = FS*60/bpm();
+  const tokens = own ? null : SONGS[songKey];
+  const sched = [];                                   // {frame, ch}
+  const jr = mulberry(Math.floor(Math.random()*1e9));
+  for(let i=0;i<COUNT_IN;i++) sched.push({frame:Math.round(5+i*period), ch:P});
+  if(tokens) tokens.forEach((tk,b)=>{ if(tk!==HOLD) sched.push({frame:Math.round(5+(COUNT_IN+b)*period + (jr()*4-2)), ch:tk}); });
+  sched.sort((a,b)=>a.frame-b.frame);
+  S = { kind, loopsLeft, own, L, tokens, sched, si:0, t:0, clock:new Clock(), bank:new Bank(),
+        cue: kind==="cue" ? (L===32?12:8) : L, heard:new Array(L).fill(null), pred:new Array(L).fill(null),
+        played:new Array(L).fill(null), surpr:new Array(L).fill(null), feats:new Array(L).fill(null),
+        nextPred:0, nextEval:0, pendingPub:null, freerun:false, lastP:null, pendingKeys:[] };
+  setStatus();
+}
+function stopRun(msg){ S=null; statusEl.textContent = msg || "Stopped."; }
+function setStatus(){
+  if(!S) return;
+  const what = S.kind==="teach" ? `Teaching${S.own?" (play along on the pads)":""}` : (S.freerun ? "Machine continuing on its own clock" : "Listening to the cue");
+  const hz = S.clock.phi===null ? "–" : Math.round(S.clock.f*FS*60);
+  const beat = S.clock.phi===null ? "count-in" : (S.clock.phi<COUNT_IN ? "count-in" : "beat "+Math.min(S.L, Math.floor(S.clock.phi-COUNT_IN)+1)+"/"+S.L);
+  statusEl.textContent = `${what} · ${beat} · clock hears ${hz} bpm`;
+}
+
+function frame(){
+  const x = new Float64Array(NCH);
+  // external input
+  if(!S.freerun){
+    while(S.si<S.sched.length && S.sched[S.si].frame<=S.t){
+      const e=S.sched[S.si++]; x[e.ch]=1;
+      if(e.ch===P) playClick(); else { playHeard(e.ch); flashPad(e.ch,"hit"); }
+    }
+    for(const p of S.pendingKeys){ if(S.clock.phi!==null) { x[p]=1; } }
+  }
+  S.pendingKeys.length=0;
+  const onsetAny = x.some(v=>v>0);
+  const phiBefore = S.clock.phi;
+  let dphi;
+  if(S.freerun){ dphi=S.clock.f; S.clock.phi+=dphi; }
+  else dphi = S.clock.step(S.t, onsetAny, x[P]>0);
+  // record what was heard, assigned by the machine's own clock
+  if(!S.freerun && S.clock.phi!==null){
+    for(let c=0;c<P;c++) if(x[c]>0){ const b=Math.round(S.clock.phi)-COUNT_IN; if(b>=0&&b<S.L) S.heard[b]=c; }
+  }
+  const phi = S.clock.phi;
+  if(phi!==null){
+    // prediction a quarter beat before each slot
+    if(S.nextPred<S.L && phi >= COUNT_IN+S.nextPred-0.25){
+      const b=S.nextPred, h=S.bank.pyramids(), r=readout(h);
+      S.feats[b]={h,o:r.o}; S.pred[b]=argmax(r.p); S.lastP=r.p; S.nextPred++;
+      if(S.kind==="cue" && b>=S.cue){ S.freerun=true; S.pendingPub={b, tok:S.pred[b]}; }
+    }
+    // chandelier: publish at the slot
+    if(S.freerun && S.pendingPub && phi >= COUNT_IN+S.pendingPub.b){
+      const {b,tok}=S.pendingPub; S.played[b]=tok; S.pendingPub=null;
+      if(tok!==HOLD){ x[tok]=1; playMachine(tok); flashPad(tok,"mhit"); }
+    }
+    // evaluate and learn half a beat after each slot (listening part only)
+    if(S.nextEval<S.L && phi >= COUNT_IN+S.nextEval+0.45 && S.feats[S.nextEval] && !(S.kind==="cue" && S.nextEval>=S.cue)){
+      const b=S.nextEval, tgt = S.heard[b]===null ? HOLD : S.heard[b];
+      const {h,o}=S.feats[b]; const p=readout(h).p;
+      S.surpr[b] = -Math.log(p[tgt]+1e-9);
+      playResidue(S.surpr[b]);
+      if(S.kind==="teach") learn(h,o,tgt);
+      S.nextEval++;
+    }
+  }
+  S.bank.step(dphi, x);
+  S.t++;
+  const end = phi!==null && phi >= COUNT_IN + S.L + 0.6;
+  if(end || S.t > 5+ (COUNT_IN+S.L+4)*FS*60/50) finishRun();
+}
+function argmax(a){let b=0; for(let i=1;i<a.length;i++) if(a[i]>a[b]) b=i; return b;}
+
+function finishRun(){
+  const run=S;
+  if(run.kind==="teach"){
+    const s=run.surpr.filter(v=>v!==null);
+    const mean=s.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
+    let ok=0,n=0; run.pred.forEach((p,b)=>{ if(p!==null && run.surpr[b]!==null){ n++; ok+= p===(run.heard[b]===null?HOLD:run.heard[b]); }});
+    history.push({mean, acc:n?ok/n:0, bpm:bpm()});
+    if(history.length>24) history.shift();
+  }
+  lastRun = run;
+  if(run.kind==="teach" && run.loopsLeft>1){ newRun("teach", run.loopsLeft-1); return; }
+  S=null;
+  if(run.kind==="cue"){
+    let ok=0,n=0;
+    if(run.tokens){ for(let b=run.cue;b<run.L;b++){ n++; ok += run.played[b]===run.tokens[b]; } }
+    statusEl.textContent = run.tokens ? `Done. It continued ${ok}/${n} beats correctly at ${bpm()} bpm.` : "Done. Compare its continuation with what you taught.";
+  } else statusEl.textContent = "Taught. Change the tempo and press Cue & continue.";
+}
+let lastRun=null;
+
+// ------------------------------------------------------------------ input
+const padsEl=$("pads"), padEls=[];
+for(let p=0;p<P;p++){
+  const d=document.createElement("button"); d.className="pad"; d.type="button";
+  d.innerHTML=`<span class="n">${NOTE_NAMES[p]}</span><span class="k">${KEYS[p].toUpperCase()}</span>`;
+  d.addEventListener("pointerdown", e=>{ e.preventDefault(); userNote(p); });
+  padsEl.appendChild(d); padEls.push(d);
+}
+function flashPad(p, cls){ const el=padEls[p]; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),140); }
+function userNote(p){
+  audio(); playHeard(p); flashPad(p,"hit");
+  if(S && !S.freerun && S.own) S.pendingKeys.push(p);
+}
+window.addEventListener("keydown", e=>{
+  if(e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+  const i=KEYS.indexOf(e.key.toLowerCase()); if(i<0) return;
+  if(document.activeElement && document.activeElement.tagName==="SELECT") return;
+  userNote(i);
+});
+$("teach").addEventListener("click", ()=>{ audio(); newRun("teach", $("song").value==="own" ? 1 : 3); });
+$("cue").addEventListener("click", ()=>{ audio(); newRun("cue", 1); });
+$("stop").addEventListener("click", ()=> stopRun());
+$("forget").addEventListener("click", ()=>{ forget(); history.length=0; stopRun("Memory cleared. Teach it something."); });
+
+// ------------------------------------------------------------------ loop
+let acc=0, last=performance.now();
+function tick(now){
+  acc += Math.min(200, now-last); last=now;
+  let steps=0;
+  while(acc>=10 && steps<30){ acc-=10; steps++; if(S) frame(); }
+  if(S) setStatus();
+  draw();
+  requestAnimationFrame(tick);
+}
+
+// ------------------------------------------------------------------ drawing
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function fit(cv){
+  const r=window.devicePixelRatio||1, w=cv.clientWidth, h=+cv.getAttribute("height");
+  if(cv.width!==Math.round(w*r)){ cv.width=Math.round(w*r); cv.height=Math.round(h*r); cv.style.height=h+"px"; }
+  const g=cv.getContext("2d"); g.setTransform(r,0,0,r,0,0); return [g,w,h];
+}
+function draw(){
+  const C={ink:css("--ink"),muted:css("--muted"),line:css("--line"),brass:css("--brass"),machine:css("--machine"),panel:css("--panel"),bg:css("--bg")};
+  const run = S || lastRun;
+  drawRoll(C, run); drawBank(C, run); drawClock(C, run); drawHist(C);
+}
+function drawRoll(C, run){
+  const [g,w,h]=fit($("roll")); g.clearRect(0,0,w,h);
+  const left=34, top=6, rows=P, rh=18, bottom=top+rows*rh;
+  g.font="11px "+css("--mono"); g.textBaseline="middle";
+  for(let p=0;p<P;p++){ g.fillStyle=C.muted; g.fillText(NOTE_NAMES[P-1-p], 4, top+p*rh+rh/2); }
+  g.fillText("res.", 4, bottom+34);
+  if(!run){ g.fillStyle=C.muted; g.fillText("Nothing played yet.", left+8, top+rh*4); return; }
+  const L=run.L, cw=(w-left-4)/L;
+  for(let b=0;b<L;b++){
+    const x=left+b*cw;
+    g.fillStyle = b%4===0 ? C.line : "transparent"; g.fillRect(x,top,1,rows*rh);
+    if(run.kind==="cue" && b===run.cue){ g.fillStyle=C.machine; g.fillRect(x-1,top-4,2,rows*rh+60); }
+    const put=(p, fill, stroke)=>{ if(p===null||p===HOLD) return; const y=top+(P-1-p)*rh;
+      if(fill){ g.fillStyle=fill; g.fillRect(x+2,y+2,cw-4,rh-4); }
+      if(stroke){ g.strokeStyle=stroke; g.lineWidth=2; g.strokeRect(x+3,y+3,cw-6,rh-6); } };
+    put(run.heard[b], C.ink, null);
+    put(run.played[b], C.machine, null);
+    if(run.kind==="teach" || b<run.cue) put(run.pred[b], null, C.machine);
+    if(run.surpr[b]!==null){ const v=Math.min(1, run.surpr[b]/3); g.fillStyle=C.brass; g.fillRect(x+2, bottom+50-v*40, cw-4, v*40); }
+  }
+  g.fillStyle=C.line; g.fillRect(left, bottom+50, w-left-4, 1);
+  if(run.clock && run.clock.phi!==null){ const b=run.clock.phi-COUNT_IN; if(b>=0 && b<=L){ g.fillStyle=C.brass; g.fillRect(left+b*cw, top-4, 2, rows*rh+8);} }
+  g.fillStyle=C.muted; for(let b=0;b<L;b+=4) g.fillText(String(b+1), left+b*cw+3, h-8);
+}
+function drawBank(C, run){
+  const [g,w,h]=fit($("bank")); g.clearRect(0,0,w,h);
+  const left=30, top=20, cw=(w-left-4)/K, rh=(h-top-4)/NCH, R=Math.min(cw,rh)*0.4;
+  g.font="10px "+css("--mono"); g.textBaseline="middle"; g.textAlign="center"; g.fillStyle=C.muted;
+  MODES.forEach(([tau,nu],k)=> g.fillText((nu? "~":"")+"τ"+tau, left+k*cw+cw/2, 8));
+  g.textAlign="left";
+  const names=[...NOTE_NAMES,"clk"];
+  for(let c=0;c<NCH;c++){
+    g.fillStyle=C.muted; g.fillText(names[c], 2, top+c*rh+rh/2);
+    for(let k=0;k<K;k++){
+      const cx=left+k*cw+cw/2, cy=top+c*rh+rh/2;
+      g.strokeStyle=C.line; g.lineWidth=1; g.beginPath(); g.arc(cx,cy,R,0,Math.PI*2); g.stroke();
+      if(run){ const i=c*K+k, re=run.bank.re[i], im=run.bank.im[i], mag=Math.hypot(re,im), len=R*Math.tanh(mag*0.9);
+        if(len>0.6){ const a=Math.atan2(im,re); g.strokeStyle=c===P?C.muted:C.brass; g.lineWidth=2; g.beginPath(); g.moveTo(cx,cy); g.lineTo(cx+len*Math.cos(a), cy-len*Math.sin(a)); g.stroke(); } }
+    }
+  }
+}
+function drawClock(C, run){
+  const [g,w,h]=fit($("clock")); g.clearRect(0,0,w,h);
+  const cx=Math.min(w*0.28, 90), cy=90, R=66;
+  g.strokeStyle=C.line; g.lineWidth=2; g.beginPath(); g.arc(cx,cy,R,0,Math.PI*2); g.stroke();
+  for(let i=0;i<4;i++){ const a=-Math.PI/2+i*Math.PI/2; g.fillStyle=C.muted; g.fillRect(cx+Math.cos(a)*(R-6)-2, cy+Math.sin(a)*(R-6)-2, 4,4); }
+  g.font="12px "+css("--mono"); g.textAlign="left"; g.textBaseline="middle"; g.fillStyle=C.ink;
+  const tx=cx+R+18;
+  if(run && run.clock.phi!==null){
+    const ph=run.clock.phi, a=-Math.PI/2+2*Math.PI*(ph-Math.floor(ph));
+    g.strokeStyle=C.brass; g.lineWidth=3; g.beginPath(); g.moveTo(cx,cy); g.lineTo(cx+Math.cos(a)*(R-10), cy+Math.sin(a)*(R-10)); g.stroke();
+    g.font="600 22px "+css("--mono"); g.fillText(Math.round(run.clock.f*FS*60)+" bpm", tx, cy-12);
+    g.font="12px "+css("--mono"); g.fillStyle=C.muted; g.fillText("tempo the clock hears", tx, cy+12);
+  } else { g.fillStyle=C.muted; g.fillText("waiting for count-in", tx, cy); }
+  // bars
+  const top=186, bh=h-top-22, bw=(w-8)/NTOK;
+  const p = run && run.lastP;
+  const names=[...NOTE_NAMES,"hold"];
+  for(let j=0;j<NTOK;j++){
+    const x=4+j*bw, v=p? p[j]:0;
+    g.fillStyle=C.line; g.fillRect(x+3, top+bh, bw-6, 1);
+    g.fillStyle=C.machine; g.globalAlpha=0.35+0.65*v; g.fillRect(x+3, top+bh-v*bh, bw-6, v*bh); g.globalAlpha=1;
+    if(p && j===argmax(p)){ g.strokeStyle=C.ink; g.lineWidth=2; g.strokeRect(x+2, top+bh-v*bh-1, bw-4, v*bh+2); }
+    g.fillStyle=C.muted; g.textAlign="center"; g.font="11px "+css("--mono"); g.fillText(names[j], x+bw/2, h-8);
+  }
+  g.textAlign="left";
+}
+function drawHist(C){
+  const [g,w,h]=fit($("hist")); g.clearRect(0,0,w,h);
+  g.font="11px "+css("--mono"); g.textBaseline="middle";
+  if(!history.length){ g.fillStyle=C.muted; g.fillText("Each teaching run adds a bar: mean surprise in nats.", 4, h/2); return; }
+  const left=34, n=24, bw=(w-left-4)/n, max=3;
+  g.fillStyle=C.muted; g.fillText("3", 4, 12); g.fillText("0", 4, h-14);
+  g.fillStyle=C.line; g.fillRect(left, h-14, w-left-4, 1);
+  history.forEach((r,i)=>{ const v=Math.min(1,r.mean/max), x=left+i*bw;
+    g.fillStyle=C.brass; g.fillRect(x+3, h-14-v*(h-28), bw-6, v*(h-28));
+    g.fillStyle=C.muted; g.textAlign="center"; g.fillText(r.mean.toFixed(1), x+bw/2, Math.max(8, h-22-v*(h-28))); g.textAlign="left"; });
+}
+requestAnimationFrame(tick);
+})();
+</script>
