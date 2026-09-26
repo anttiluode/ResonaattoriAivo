@@ -1,0 +1,30 @@
+[    16s] 0 none/FAST post 0.648 whole 0.741
+[    91s] 0 identity/FAST post 0.616 whole 0.73
+[   218s] 0 state/FAST post 0.736 whole 0.832
+[   219s] 0 attacks post: clamp 0.282 shuffle 0.31
+[   237s] 0 none/SLOW post 0.764 whole 0.828
+[   364s] 0 state/SLOW post 0.833 whole 0.893
+[   479s] 0 state/FAST@4λ post 0.486 whole 0.571
+[   491s] 1 none/FAST post 0.648 whole 0.721
+[   573s] 1 identity/FAST post 0.574 whole 0.721
+[   688s] 1 state/FAST post 0.713 whole 0.839
+[   689s] 1 attacks post: clamp 0.282 shuffle 0.287
+[   708s] 1 none/SLOW post 0.727 whole 0.831
+[   833s] 1 state/SLOW post 0.815 whole 0.882
+[   955s] 1 state/FAST@4λ post 0.514 whole 0.595
+[   967s] 2 none/FAST post 0.676 whole 0.736
+[  1042s] 2 identity/FAST post 0.593 whole 0.724
+[  1156s] 2 state/FAST post 0.694 whole 0.832
+[  1157s] 2 attacks post: clamp 0.301 shuffle 0.204
+[  1175s] 2 none/SLOW post 0.75 whole 0.822
+[  1308s] 2 state/SLOW post 0.833 whole 0.885
+[  1429s] 2 state/FAST@4λ post 0.486 whole 0.58
+[  1429s] T1 {'PASS': False} T2 {'clamp_post': 0.288580252064599, 'shuffle_post': 0.2669753101136949, 'PASS': True} T4 {'PASS': True} T5 {'gain_with_own_memory': 0.08024691873126555, 'PASS': False}
+[  1438s] T3 {'cases': 6, 'follows_transplanted_history': 0.3333333333333333, 'PASS': False}
+[  1554s] gain e^-1 (0.6990740696589152, 0.821180542310079)
+[  1674s] gain e^-2 (0.6296296318372091, 0.7612847288449606)
+[  1687s] noise 0.003 none (0.8472222089767456, 0.9244791666666666)
+[  1803s] noise 0.003 state (0.9490740696589152, 0.9470486044883728)
+[  1815s] noise 0.01 none (0.4722222189108531, 0.5967881878217062)
+[  1930s] noise 0.01 state (0.6296296318372091, 0.7261284788449606)
+[  1930s] SUMMARY {'T1': False, 'T2': True, 'T3': False, 'T4': True, 'T5': False}

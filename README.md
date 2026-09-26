@@ -79,6 +79,45 @@ Noise 0.01, three fresh seeds, tempos 0.6 / 1.0 / 1.6:
 - **What the geometry learned** (noise 0.003, all 3 seeds agree): the fastest mode slows down (τ 0.7 → 1.0–1.6 beats), and both oscillating modes lengthen their decay (3 → 4.4–4.8 and 8 → 10–12 beats). The oscillating modes keep their frequencies (ν ≈ 0.25 and 0.12 cycles/beat). The pure-decay modes pick up small rotations (|ν| up to 0.1).
 - **Correction to Stage 1.** Stage 1's drop to 73–78 % at noise 0.003 was mostly its training (delta rule, feature scaling), not the fixed geometry. With a better-conditioned readout, fixed geometry holds 94.8 % at that noise. The fragility is real, but it starts at higher noise (0.01).
 
+## Stage 3: two modules that share only events
+
+Motivated by Martin-Burgos et al. (bioRxiv 2026.09.15.751814: spike waveforms vary with input and network state) and by analog-digital facilitation (a neuron's state reaches only synapses within ~150–700 µm of axon). The question: when two systems share only events, can a small state-dependent **shape** on each event carry history the receiver cannot hold itself? Gates: [`GATES_STAGE3.md`](GATES_STAGE3.md), committed before the run. Receipt: [`results/receipt_stage3.json`](results/receipt_stage3.json).
+
+- **The sender** hears the melody with long memory (τ up to 24 beats). It fires at every onset, keeping timing and identity, plus a 3-number shape from a trainable head.
+- **The receiver** has only short memory (τ < 6 beats) and hears only the events.
+- **The task** sits behind an 18-beat shared segment, so only the old history says which song it is.
+- **Setup:** noise 0.006, trained at tempo 1.0, tested at 0.6 / 1.0 / 1.6, 3 seeds.
+- **The shape** is an abstract descriptor, not a simulated voltage trace.
+
+| arm | after the segment | whole song |
+|---|---|---|
+| timestamps + identity only | 65.7 % | 73.3 % |
+| shape from identity only | 59.4 % | 72.5 % |
+| **shape from sender state** | **71.5 %** | **83.4 %** |
+| shape from sender state, attenuated e⁻⁴ | 49.5 % | 58.2 % |
+| receiver with its own long memory, no shape | 74.7 % | 82.7 % |
+| receiver with its own long memory + shape | 82.7 % | 88.7 % |
+| *post hoc:* sender with **short** memory only | 71.3 % | 82.9 % |
+
+| gate | result |
+|---|---|
+| T1 shape carries history (+15 pts after the segment) | **FAIL** +5.8 pts |
+| T2 clamp / shuffle the shapes lose ≥ 15 pts | **PASS** 28.9 % / 26.7 %, below the no-shape baseline |
+| T3 transplanting the sender's history redirects the continuation | **FAIL** 2 of 6 eligible cases (only 6 cases qualified) |
+| T4 at 4 length constants the benefit is gone | **PASS** but the attenuated, noisy channel actively hurts |
+| T5 (my prediction) a receiver with its own memory gains < 3 pts | **FAIL** +8.0 pts |
+
+**What this shows.**
+- **State-dependent events help, and the receiver comes to depend on them.** Whole-song accuracy rises by 10 points. Clamping or shuffling the shapes drops the receiver below where it would be with no shapes at all.
+- **The shapes do not carry old history.**
+  - A sender with no more memory than the receiver gives the same gain (post-hoc control).
+  - Transplanting the sender's history does not redirect the continuation.
+  - What the shape carries is a cleaner, trained summary of recent context. The sender works as a second processing stage.
+  - This is the reading Sol flagged as the less interesting one ("extra analog bandwidth"). Here it is the right one.
+- **Distance works in one direction only.** Beyond the length constant the benefit disappears, as the geometry says. A receiver tuned to listen to that channel then pays for listening to noise.
+- **My T5 prediction was wrong in its number and right in its reason.** A receiver with its own long memory still gained 8 points, but from the extra processing stage, not from missing history.
+- **Biology.** This does not test real spikes. It shows that in a small learned system, the useful content of a state-dependent spike was the sender's processing, not its memory.
+
 ## Ledger: what did not work, and what is not new
 
 - **G4 failed.** A 6-beat shared segment is not long enough to need the slow bands. The post-hoc sweep (`posthoc.py`) makes the segment 12 and 18 beats long. Without slow bands the model then drops to 82–84 %, while full RA stays at 100 %. So the slow bands help noise-free.
@@ -99,6 +138,8 @@ python make_figure.py
 python run_stage2.py       # Stage 2 gates S1-S3 + noise sweep (~40 min)
 python run_stage2_s5.py    # S5 confirmation at noise 0.01 (~20 min)
 python make_figure_stage2.py
+PYTHONPATH=. python run_stage3.py        # Stage 3 gates T1-T5 (~35 min)
+PYTHONPATH=. python posthoc_stage3.py    # short-memory sender control
 ```
 Open `demo/index.html` in a browser for the instrument. Teach it Ukko Nooa, change the tempo, then press Cue & continue.
 
@@ -116,5 +157,8 @@ posthoc*.py         follow-ups written after the receipt
 GATES_STAGE2.md     Stage 2 gates (plastic geometry) + ledger
 ra/plastic.py       torch resonators whose tau, nu and coupling the residue can reshape
 run_stage2*.py      Stage 2 runners
+GATES_STAGE3.md     Stage 3 gates (two modules, events only) + ledger
+ra/twomodule.py     sender/receiver modules, state-dependent event shapes, attacks
+run_stage3.py       Stage 3 runner
 demo/index.html     browser instrument (same model, RLS readout)
 ```
